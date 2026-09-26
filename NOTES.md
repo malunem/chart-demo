@@ -42,4 +42,12 @@
 - I need to compute the x and y data ranges once
 - now with scaling it looks much better, but still very basic
 - I'm thinking, since I can't install new dependencies, to use a CDN instead, like bootstrap or tailwind and chart.js
-- 
+- implemented chart.js via cdn script and replaced bare canvas with Chart, which renders much more nicely by default and shows data info on hover
+  - manually added some typing in chart.d.ts
+  - thinking of turning the two useEffects into custom hooks at a later stage (eg useChartJS, useLineChart)
+  - the page is still very basic, will make it nicer
+  - idea for later: filter lines with a dropdown
+- now it's time to setup a basic settings page
+
+---
+
