@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client'
 import { Main } from './pages/main'
 import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
-import { Chart } from './pages/chart';
+import { LineChart } from './pages/chart';
 import { Settings } from './pages/settings';
 
 const router = createBrowserRouter([
@@ -12,8 +12,8 @@ const router = createBrowserRouter([
   },
   {
     path: '/chart',
-    element: <Chart />
-  }, 
+    element: <LineChart />
+  },
   {
     path: '/settings',
     element: <Settings />

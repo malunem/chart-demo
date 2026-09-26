@@ -38,3 +38,8 @@
 
 ---
 
+- rendering the lines is easy, but defaults to an ugly result, thinking how to distribute points along the width of the canvas , then I'll make the canvas responsive
+- I need to compute the x and y data ranges once
+- now with scaling it looks much better, but still very basic
+- I'm thinking, since I can't install new dependencies, to use a CDN instead, like bootstrap or tailwind and chart.js
+- 

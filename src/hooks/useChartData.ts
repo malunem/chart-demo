@@ -1,22 +1,7 @@
 import React, { useEffect } from 'react';
+import type { ChartData, ChartDataResponse } from '../types';
 
-export type ChartPoint = {
-  x: number;
-  y: number;
-}
 
-export type ChartItem = {
-  name: string;
-  color: string;
-  points: ChartPoint[]
-};
-
-export type ChartData = ChartItem[];
-
-export type ChartDataResponse = {
-  status: 'OK' | unknown;
-  items: ChartData;
-}
 
 export function useChartData() {
   const [data, setData] = React.useState<ChartData | null>(null);
