@@ -11,3 +11,30 @@
 - chart and settings pages created and routed
 
 ---
+
+- will need to add a nice layout and navigation, but for now I want to get a basic chart working and define the scope of the settings page
+- first: check the GET endpoint to see what data is provided
+  - https://brainx.sk/api/chart-data 
+  - it returns a status string, first thing to check before rendering (will need to handle errors)
+  - there are 4 items returned in the items array, each with a name (line number n), color (hexcode), and points array of {x,y} coordinates objects
+  - should the lines be rendered in the same chart? what could they represent?
+    - maybe add an option to only show desired lines 
+    - x axis goes from 0 to 100
+    - y axis goes from ~200 to ~800
+    - but data could change significantly and no constraints are given so I have to make the chart work for various data ranges
+- let's start with a simple single line chart
+- checking [canvas docs](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API) as I haven't used it in a while
+  - googling for canvas line charts examples rather than bare apis, there might be some nice libraries to speed up things and make it look better 
+  - found Chart.js, but I can't modify dependencies,so that's pointless, checking whether a canvas library is already included
+    - it isn't, so I'll stick with native apis (asked AI for a template example without providing context of the challenge)
+- actually, first of all I want to validate the endpoint and print the raw data, then use it to populate the canvas
+  - could be the use case for the custom hook (useChartData)
+  - at some point will need to get settings data so that could be another use case, will need to setup global state for that
+- got a CORS error when fetching data, because my app is running on localhost. Asking AI ideas on how to solve. Found out there's a builtin proxy setting in vite. Double checking actual docs, found [server proxy examples](https://vite.dev/config/server-options#server-proxy)
+  - didn't fix, I still get an error
+- I'm thinking at work we also need a local proxy to avoid this problem, we use Caddy, but I don't think it's worth implementing here. I will look for a simpler solution. Maybe some other settings in Vite?
+- turned out I simply didn't notice a typo, I was calling /api/chart-data instead of /api/chart-data/ , the Vite proxy setting is actually working
+- the custom hook `useChartData` is still basic (no proper error handling yet) but it fetches data correctly, now I want a basic version of a line graph rendered
+
+---
+
