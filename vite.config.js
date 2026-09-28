@@ -7,8 +7,8 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'https://brainx.sk',
-        changeOrigin: true,
-      },
+        changeOrigin: true
+      }
     }
   }
 })

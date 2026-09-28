@@ -1,24 +1,23 @@
-import { useTheme } from "../hooks/useTheme";
-import { Navbar } from "./navbar"
-import React, { useEffect } from 'react';
-
+import { useTheme } from '../hooks/useTheme'
+import { Navbar } from './navbar'
+import React, { useEffect } from 'react'
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme] = useTheme();
+  const [theme] = useTheme()
 
   useEffect(() => {
-    const html = document.documentElement;
-    html.setAttribute('data-bs-theme', theme);
+    const html = document.documentElement
+    html.setAttribute('data-bs-theme', theme)
 
     return () => {
-      html.removeAttribute('data-theme');
-    };
-  }, [theme]);
+      html.removeAttribute('data-theme')
+    }
+  }, [theme])
 
-  return <div id="layout">
-    <Navbar />
-    <div className="container-fluid">
-      {children}
+  return (
+    <div id="layout">
+      <Navbar />
+      <div className="container-fluid">{children}</div>
     </div>
-  </div>
+  )
 }

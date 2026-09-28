@@ -1,19 +1,17 @@
-
-
 export type ChartPoint = {
-  x: number;
-  y: number;
+  x: number
+  y: number
 }
 
 export type ChartItem = {
-  name: string;
-  color: string;
+  name: string
+  color: string
   points: ChartPoint[]
-};
+}
 
-export type ChartData = ChartItem[];
+export type ChartData = ChartItem[]
 
 export type ChartDataResponse = {
-  status: 'OK' | unknown;
-  items: ChartData;
+  status: 'OK' | unknown
+  items: ChartData
 }
