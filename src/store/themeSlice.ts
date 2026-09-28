@@ -11,8 +11,11 @@ const themeSlice = createSlice({
   initialState,
   reducers: {
     toggle: (state) => {
-      if (state.value === 'light') state.value = 'dark'
-      if (state.value === 'dark') state.value = 'light'
+      if (state.value === 'light') {
+        state.value = 'dark'
+      } else {
+        state.value = 'light'
+      }
     }
   }
 })

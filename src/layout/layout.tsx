@@ -8,10 +8,6 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   useEffect(() => {
     const html = document.documentElement
     html.setAttribute('data-bs-theme', theme)
-
-    return () => {
-      html.removeAttribute('data-theme')
-    }
   }, [theme])
 
   return (
