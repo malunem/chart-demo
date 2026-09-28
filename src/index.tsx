@@ -1,18 +1,20 @@
 import { createRoot } from 'react-dom/client'
-import { Main } from './pages/main'
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, Navigate } from "react-router";
 import { RouterProvider } from "react-router/dom";
-import { LineChart } from './pages/chart';
+import { ChartPage } from './pages/chart';
 import { Settings } from './pages/settings';
+import { Layout } from './layout/layout';
+import { store } from './store/store'
+import { Provider as StateProvider } from 'react-redux'
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Main />,
+    element: <Navigate to="/chart" replace />,
   },
   {
     path: '/chart',
-    element: <LineChart />
+    element: <ChartPage />
   },
   {
     path: '/settings',
@@ -26,7 +28,12 @@ if (!root) {
   root.id = 'root'
   document.body.appendChild(root)
 }
+
 createRoot(root).render(
-  <RouterProvider router={router} />,
+  <StateProvider store={store}>
+    <Layout>
+      <RouterProvider router={router} />,
+    </Layout>
+  </StateProvider>
 );
 

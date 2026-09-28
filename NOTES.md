@@ -51,3 +51,14 @@
 
 ---
 
+- settings page needs some modern components from the start,will use bootstrap for simplicity and quick progress
+- what settings to include?
+  - theme (light/dark)
+  - language (english/italian), will need i18 translation strings
+  - font size?
+- adding some bootstrap components to quickly build a simple UI
+  - using bootstrap theme utilities ('data-bs-theme' attribute), it needs a layout wrapper component and a global state
+  - creating store folder for all things redux 
+  - double checking with docs and AI (asking AI to point me to the relevant docs pages) as I don't remember redux syntax, i've been using react context for the last years
+  - good opportunity to setup a new custom hook `useTheme`
+- 
