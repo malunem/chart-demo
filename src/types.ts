@@ -15,3 +15,7 @@ export type ChartDataResponse = {
   status: 'OK' | unknown
   items: ChartData
 }
+
+export type Theme = 'light' | 'dark'
+
+export type Language = 'en' | 'it'
