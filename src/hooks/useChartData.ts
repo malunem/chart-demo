@@ -1,10 +1,17 @@
-import React, { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import type { ChartData, ChartDataResponse } from '../types'
 
+/**
+ * Fetches and returns JSON chart data from endpoint /api/chart-data/
+ */
 export function useChartData() {
-  const [data, setData] = React.useState<ChartData | null>(null)
+  const [data, setData] = useState<ChartData | null>(null)
 
   useEffect(() => {
+
+    /**
+     * Fetches the response and stores its `items` array
+     */
     async function fetchChartData() {
       try {
         const response = await fetch('/api/chart-data/')
@@ -12,7 +19,7 @@ export function useChartData() {
 
         setData(data.items)
       } catch (err) {
-        console.error(err)
+        throw new Error(`Error fetching chart-data: ${err}`)
       }
     }
 

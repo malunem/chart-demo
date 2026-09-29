@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
+import type { Theme } from '../types'
 
-export type Theme = 'light' | 'dark'
 type ThemeState = {
   value: Theme
 }

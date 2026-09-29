@@ -61,4 +61,11 @@
   - creating store folder for all things redux
   - double checking with docs and AI (asking AI to point me to the relevant docs pages) as I don't remember redux syntax, i've been using react context for the last years
   - good opportunity to setup a new custom hook `useTheme`
+
+---
+
+- I run out of time, I need to wrap up with essential UI improvements (layout margins), add some tests and run all checks
+  - checking how straightforward is to add a couple of translation strings for a language dropdown setting
+  - i'm just using a demo const i18n + redux language state rather than a full implementation with a library
 -
+- I want to store the json raw data in a redux slice and use it to export raw data as a bonus feature
