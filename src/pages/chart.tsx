@@ -12,6 +12,8 @@ export const ChartPage = () => {
   const chartRef = useRef<HTMLCanvasElement>(null)
   const [lang] = useLanguage()
 
+  const isLoading = !isReady && !lines
+
   useEffect(() => {
     if (window.Chart) {
       return
@@ -74,7 +76,15 @@ export const ChartPage = () => {
           </div>
         </div> */}
       </div>
-      <canvas id="chart" ref={chartRef}></canvas>
+      {isLoading ? (
+        <div className="d-flex justify-content-center">
+          <div className="spinner-border my-5" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      ) : (
+        <canvas id="chart" ref={chartRef}></canvas>
+      )}
     </>
   )
 }
