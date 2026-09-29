@@ -9,16 +9,12 @@ import { Provider as StateProvider } from 'react-redux'
 
 const router = createBrowserRouter([
   {
-    path: '/',
-    element: <Navigate to="/chart" replace />
-  },
-  {
-    path: '/chart',
-    element: <ChartPage />
-  },
-  {
-    path: '/settings',
-    element: <SettingsPage />
+    element: <Layout />,
+    children: [
+      { path: '/', element: <Navigate to="/chart" replace /> },
+      { path: '/chart', element: <ChartPage /> },
+      { path: '/settings', element: <SettingsPage /> }
+    ]
   }
 ])
 
@@ -31,8 +27,6 @@ if (!root) {
 
 createRoot(root).render(
   <StateProvider store={store}>
-    <Layout>
-      <RouterProvider router={router} />
-    </Layout>
+    <RouterProvider router={router} />
   </StateProvider>
 )

@@ -8,7 +8,6 @@ export function useChartData() {
   const [data, setData] = useState<ChartData | null>(null)
 
   useEffect(() => {
-
     /**
      * Fetches the response and stores its `items` array
      */

@@ -67,5 +67,6 @@
 - I run out of time, I need to wrap up with essential UI improvements (layout margins), add some tests and run all checks
   - checking how straightforward is to add a couple of translation strings for a language dropdown setting
   - i'm just using a demo const i18n + redux language state rather than a full implementation with a library
--
+- all checks are now passing. an essential thing todo: implement loading and error boundary for the chart
+- while implementing the language selector, i noticed I forgot to use react-router Link components and therefore the global state was resetting (fixed)
 - I want to store the json raw data in a redux slice and use it to export raw data as a bonus feature

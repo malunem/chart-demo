@@ -1,3 +1,4 @@
+import { Link } from 'react-router'
 import { useLanguage } from '../hooks/useLanguage'
 import { LABELS } from '../i18n'
 
@@ -11,9 +12,7 @@ export const Navbar = () => {
   return (
     <nav className="navbar navbar-expand-lg bg-body-tertiary mb-4">
       <div className="container-fluid">
-        <div className="navbar-brand">
-          Brainomix
-        </div>
+        <div className="navbar-brand">Brainomix</div>
         <button
           className="navbar-toggler"
           type="button"
@@ -27,14 +26,14 @@ export const Navbar = () => {
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
-              <a className="nav-link active" aria-current="page" href="/chart">
+              <Link className="nav-link" to="/chart">
                 {langLabels.chart}
-              </a>
+              </Link>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="/settings">
+              <Link className="nav-link" to="/settings">
                 {langLabels.settings}
-              </a>
+              </Link>
             </li>
           </ul>
         </div>

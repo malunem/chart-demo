@@ -19,6 +19,8 @@ export const LANGUAGES: LanguageOptions = {
   }
 }
 
+export const LANGUAGE_KEYS = Object.keys(LANGUAGES) as Language[]
+
 const initialState: LanguageState = { ...LANGUAGES.en }
 const languageSlice = createSlice({
   name: 'language',

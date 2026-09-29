@@ -1,3 +1,4 @@
+import { Outlet } from 'react-router'
 import { useTheme } from '../hooks/useTheme'
 import { Navbar } from './navbar'
 import { useEffect } from 'react'
@@ -5,7 +6,7 @@ import { useEffect } from 'react'
 /**
  * Wraps page content within a container and renders top navbar
  */
-export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const Layout = () => {
   const [theme] = useTheme()
 
   useEffect(() => {
@@ -16,7 +17,9 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   return (
     <div id="layout">
       <Navbar />
-      <div className="container-fluid px-4">{children}</div>
+      <div className="container-fluid px-4">
+        <Outlet />
+      </div>
     </div>
   )
 }

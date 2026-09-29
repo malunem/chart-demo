@@ -14,7 +14,7 @@ export const useLanguage = () => {
   /**
    * Sets the language by dispatching the `switchLanguage` action.
    * Falls back to `'en'` when the language isn't found in `LANGUAGES`
-   */  
+   */
   const setLanguage = (lang: Language) => {
     if (LANGUAGES[lang] === undefined) {
       lang = 'en'
