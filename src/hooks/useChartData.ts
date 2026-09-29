@@ -1,11 +1,14 @@
-import { useEffect, useState } from 'react'
-import type { ChartData, ChartDataResponse } from '../types'
+import { useEffect } from 'react'
+import type { ChartDataResponse } from '../types'
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { setData } from '../store/dataSlice'
 
 /**
  * Fetches and returns JSON chart data from endpoint /api/chart-data/
  */
 export function useChartData() {
-  const [data, setData] = useState<ChartData | null>(null)
+  const { value: data } = useAppSelector((state) => state.data)
+  const dispatch = useAppDispatch()
 
   useEffect(() => {
     /**
@@ -16,14 +19,16 @@ export function useChartData() {
         const response = await fetch('/api/chart-data/')
         const data = (await response.json()) as ChartDataResponse
 
-        setData(data.items)
+        dispatch(setData({ value: data.items }))
       } catch (err) {
         throw new Error(`Error fetching chart-data: ${err}`)
       }
     }
 
-    fetchChartData()
-  }, [])
+    if (!data) {
+      fetchChartData()
+    }
+  }, [data, dispatch])
 
   return data
 }
