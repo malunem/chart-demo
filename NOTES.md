@@ -69,4 +69,10 @@
   - i'm just using a demo const i18n + redux language state rather than a full implementation with a library
 - all checks are now passing. an essential thing todo: implement loading and error boundary for the chart
 - while implementing the language selector, i noticed I forgot to use react-router Link components and therefore the global state was resetting (fixed)
-- I want to store the json raw data in a redux slice and use it to export raw data as a bonus feature
+- I wanted to store the json raw data in a redux slice and use it to export raw data as a bonus feature, but testing the core features is the priority now to wrap up
+- demo tests on: custom hook, static page snapshot, api call
+- generated jest config with npm init jest
+- can't run tests because I'd need to install a typescript transformer in order for jest to run on .tsx files
+  - left some work in progress in `jest` branch with ts-jest installed, but decided it's not worth it now
+- adding an alert to handle api errors in chart page
+-

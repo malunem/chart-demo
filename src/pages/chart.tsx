@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useChartData } from '../hooks/useChartData'
 import { useLanguage } from '../hooks/useLanguage'
 import { LABELS } from '../i18n'
+import type { ChartData } from '../types'
 
 /**
  * Renders Chart Page
@@ -42,7 +43,7 @@ export const ChartPage = () => {
     const chart = new window.Chart(chartRef.current, {
       type: 'line',
       data: {
-        datasets: lines.map((line) => {
+        datasets: (lines as ChartData).map((line) => {
           return {
             label: line.name,
             data: line.points.map((point) => {

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import type { ChartDataResponse } from '../types'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { setData } from '../store/dataSlice'
@@ -9,6 +9,7 @@ import { setData } from '../store/dataSlice'
 export function useChartData() {
   const { value: data } = useAppSelector((state) => state.data)
   const dispatch = useAppDispatch()
+  const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
     /**
@@ -21,7 +22,7 @@ export function useChartData() {
 
         dispatch(setData({ value: data.items }))
       } catch (err) {
-        throw new Error(`Error fetching chart-data: ${err}`)
+        setError(new Error(`Error fetching chart-data: ${err}`))
       }
     }
 
@@ -29,6 +30,10 @@ export function useChartData() {
       fetchChartData()
     }
   }, [data, dispatch])
+
+  if (error) {
+    return error
+  }
 
   return data
 }
