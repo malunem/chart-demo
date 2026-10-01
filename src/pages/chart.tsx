@@ -1,69 +1,139 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useChartData } from '../hooks/useChartData'
 import { useLanguage } from '../hooks/useLanguage'
 import { LABELS } from '../i18n'
-import type { ChartData } from '../types'
+import type { ChartData, ChartItem } from '../types'
+import './chart.css';
 
 /**
  * Renders Chart Page
  */
 export const ChartPage = () => {
-  const lines = useChartData()
-  const [isReady, setReady] = useState(false)
+  const lines = useChartData() as ChartData
   const chartRef = useRef<HTMLCanvasElement>(null)
   const [lang] = useLanguage()
 
-  const isLoading = !isReady && !lines
+  const isLoading = !chartRef && !lines
 
-  useEffect(() => {
-    if (window.Chart) {
-      return
+  const height = 500;
+  const width = 800;
+  const margin = 20;
+  const netHeight = height - (margin * 2);
+  const netWidth = width - (margin * 2)
+
+  const dataBoundaries = useMemo(() => getDataBoundaries(lines), [lines])
+
+
+  const normalizePoint = ({ x, y }: { x: number, y: number }) => {
+    const { maxX, maxY, minY, minX } = dataBoundaries;
+
+    const rangeX = maxX - minX || 1
+    const rangeY = maxY - minY || 1
+
+    const xScale = Math.abs(netWidth / rangeX)
+    const yScale = Math.abs(netHeight / rangeY)
+
+    return {
+      x: (x - minX) * xScale,
+      y: (y - minY) * yScale
     }
+  }
 
-    const script = document.createElement('script')
-    script.src = 'https://cdn.jsdelivr.net/npm/chart.js'
-
-    /**
-     * Sets Ready state when Chart.JS script is loaded so chart can be rendered correctly
-     */
-    const handleLoad = () => setReady(true)
-
-    script.onload = handleLoad
-    document.head.appendChild(script)
-
-    return () => {
-      script.removeEventListener('load', handleLoad)
+  const cartesianToCanvas = ({ x, y }: { x: number, y: number }) => {
+    return {
+      x: x + margin,
+      y: height - y - margin
     }
-  }, [])
+  }
 
-  useEffect(() => {
-    if (!chartRef.current || !lines) return
-    if (!window.Chart) return
+  const drawLine = ({ ctx, line }: { ctx: CanvasRenderingContext2D, line: ChartItem }) => {
+    if (!line) return;
 
-    const chart = new window.Chart(chartRef.current, {
-      type: 'line',
-      data: {
-        datasets: (lines as ChartData).map((line) => {
-          return {
-            label: line.name,
-            data: line.points.map((point) => {
-              return { x: point.x, y: point.y }
-            })
-          }
-        })
-      },
-      options: {
-        responsive: true,
-        scales: {
-          x: {
-            type: 'linear'
-          }
-        }
-      }
+    ctx.lineWidth = 3;
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = line.color;
+    console.log({ color: line.color, name: line.name })
+    ctx.beginPath()
+    line.points.forEach((line, i) => {
+
+      const normalized = normalizePoint({ x: line.x, y: line.y });
+
+      const { x, y } = cartesianToCanvas(normalized)
+
+      if (i === 0) ctx.moveTo(x, y)
+      ctx.lineTo(x, y)
     })
 
-    return () => chart.destroy()
-  }, [lines, isReady])
+    ctx.stroke()
+  }
+
+  const drawXgrid = (ctx: CanvasRenderingContext2D) => {
+    const xPointsDistance = netWidth / 10;
+    console.log({ xPointsDistance, netWidth })
+    for (let x = xPointsDistance; x <= netWidth; x += xPointsDistance) {
+      ctx.strokeStyle = 'grey';
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.5;
+      ctx.beginPath()
+      ctx.moveTo(x + margin, margin)
+      ctx.lineTo(x + margin, netHeight + margin)
+      ctx.stroke()
+
+      // labels
+      const { maxX } = dataBoundaries;
+      const label = ((maxX * x) / netWidth).toString()
+      ctx.strokeStyle = 'black';
+      ctx.globalAlpha = 1;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      ctx.fillText(label, x + margin, netHeight + margin + 2);
+
+    }
+  }
+
+  const drawYgrid = (ctx: CanvasRenderingContext2D) => {
+    const yPointsDistance = netHeight / 10;
+    console.log({ yPointsDistance, netHeight })
+    for (let y = yPointsDistance; y <= netHeight; y += yPointsDistance) {
+      ctx.strokeStyle = 'grey';
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.5;
+      ctx.beginPath()
+      ctx.moveTo(margin, y + margin)
+      ctx.lineTo(netWidth + margin, y + margin)
+      ctx.stroke()
+
+      // labels
+      const { maxY } = dataBoundaries;
+      const label = ((maxY * y) / netHeight).toString()
+      ctx.strokeStyle = 'black';
+      ctx.globalAlpha = 1;
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      ctx.fillText(label, margin - 2, netHeight - y + margin);
+
+    }
+  }
+
+  useEffect(() => {
+    if (!chartRef.current || !lines) return;
+
+    const ctx = chartRef.current.getContext('2d');
+    if (!ctx) return;
+
+    // ctx.globalAlpha = 1;
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'black';
+    ctx.strokeRect(margin, margin, netWidth, netHeight)
+
+    drawXgrid(ctx);
+    drawYgrid(ctx)
+
+    lines.forEach(line => drawLine({ ctx, line }))
+
+    return () => ctx.clearRect(0, 0, width, height);
+
+  }, [lines, chartRef])
 
   return (
     <>
@@ -77,8 +147,23 @@ export const ChartPage = () => {
           </div>
         </div>
       ) : (
-        <canvas id="chart" ref={chartRef}></canvas>
+        <canvas id="chart" ref={chartRef} height={height} width={width}
+        ></canvas>
       )}
     </>
   )
+}
+
+const getDataBoundaries = (lines: ChartData) => {
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  lines?.forEach((line) => {
+    line.points.forEach(({ x, y }) => {
+      if (x > maxX) maxX = x
+      if (x < minX) minX = x
+      if (y > maxY) maxY = y
+      if (y < minY) minY = y
+    })
+  })
+  return { maxX, maxY, minY, minX }
+
 }

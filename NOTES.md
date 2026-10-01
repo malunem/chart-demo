@@ -75,4 +75,12 @@
 - can't run tests because I'd need to install a typescript transformer in order for jest to run on .tsx files
   - left some work in progress in `jest` branch with ts-jest installed, but decided it's not worth it now
 - adding an alert to handle api errors in chart page
--
+
+---
+
+- removing Chart.js to use bare Canvas HTML APIs
+  - restored previous work
+  - noticed that y coordinates are upside down, because canvas origin is top-left rather than bottom-left so I need to compute height in the opposite direction (`height-y`)
+  - points are also not well distributed in the canvas, so they need to be normalised and scaled for better rendering
+  - referencing https://www.w3schools.com/tags/ref_canvas.asp to apply some nice styling and background grids
+  - in order to add data labels on left and bottom, i need to create a margin inside the canvas, at the sides. i've done it manually first, next i'll try using .translate() and .scale() as a more robust solution
