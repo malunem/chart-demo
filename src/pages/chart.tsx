@@ -3,7 +3,6 @@ import { useChartData } from '../hooks/useChartData'
 import { useLanguage } from '../hooks/useLanguage'
 import { LABELS } from '../i18n'
 import type { ChartData, ChartItem } from '../types'
-import './chart.css';
 
 /**
  * Renders Chart Page
@@ -18,8 +17,8 @@ export const ChartPage = () => {
   const height = 500;
   const width = 800;
   const margin = 20;
-  const netHeight = height - (margin * 2);
-  const netWidth = width - (margin * 2)
+  const innerHeight = height - (margin * 2);
+  const innerWidth = width - (margin * 2)
 
   const dataBoundaries = useMemo(() => getDataBoundaries(lines), [lines])
 
@@ -30,8 +29,8 @@ export const ChartPage = () => {
     const rangeX = maxX - minX || 1
     const rangeY = maxY - minY || 1
 
-    const xScale = Math.abs(netWidth / rangeX)
-    const yScale = Math.abs(netHeight / rangeY)
+    const xScale = Math.abs(innerWidth / rangeX)
+    const yScale = Math.abs(innerHeight / rangeY)
 
     return {
       x: (x - minX) * xScale,
@@ -41,18 +40,16 @@ export const ChartPage = () => {
 
   const cartesianToCanvas = ({ x, y }: { x: number, y: number }) => {
     return {
-      x: x + margin,
-      y: height - y - margin
+      x: x ,
+      y: innerHeight - y 
     }
   }
 
   const drawLine = ({ ctx, line }: { ctx: CanvasRenderingContext2D, line: ChartItem }) => {
     if (!line) return;
 
-    ctx.lineWidth = 3;
-    ctx.globalAlpha = 1;
+
     ctx.strokeStyle = line.color;
-    console.log({ color: line.color, name: line.name })
     ctx.beginPath()
     line.points.forEach((line, i) => {
 
@@ -68,50 +65,46 @@ export const ChartPage = () => {
   }
 
   const drawXgrid = (ctx: CanvasRenderingContext2D) => {
-    const xPointsDistance = netWidth / 10;
-    console.log({ xPointsDistance, netWidth })
-    for (let x = xPointsDistance; x <= netWidth; x += xPointsDistance) {
-      ctx.strokeStyle = 'grey';
-      ctx.lineWidth = 1;
-      ctx.globalAlpha = 0.5;
+    const xPointsDistance = innerWidth / 10;
+    for (let x = xPointsDistance; x <= innerWidth; x += xPointsDistance) {
       ctx.beginPath()
-      ctx.moveTo(x + margin, margin)
-      ctx.lineTo(x + margin, netHeight + margin)
+      ctx.moveTo(x , 0)
+      ctx.lineTo(x , innerHeight )
       ctx.stroke()
 
       // labels
       const { maxX } = dataBoundaries;
-      const label = ((maxX * x) / netWidth).toString()
+      const label = ((maxX * x) / innerWidth).toString()
+      ctx.save()
       ctx.strokeStyle = 'black';
       ctx.globalAlpha = 1;
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
-      ctx.fillText(label, x + margin, netHeight + margin + 2);
-
+      ctx.fillText(label, x , innerHeight  + 2);
+      ctx.restore()
     }
   }
 
   const drawYgrid = (ctx: CanvasRenderingContext2D) => {
-    const yPointsDistance = netHeight / 10;
-    console.log({ yPointsDistance, netHeight })
-    for (let y = yPointsDistance; y <= netHeight; y += yPointsDistance) {
-      ctx.strokeStyle = 'grey';
-      ctx.lineWidth = 1;
-      ctx.globalAlpha = 0.5;
+    const yPointsDistance = innerHeight / 10;
+    console.log({ yPointsDistance, netHeight: innerHeight })
+    for (let y = yPointsDistance; y <= innerHeight; y += yPointsDistance) {
+
       ctx.beginPath()
-      ctx.moveTo(margin, y + margin)
-      ctx.lineTo(netWidth + margin, y + margin)
+      ctx.moveTo(0, y)
+      ctx.lineTo(innerWidth, y)
       ctx.stroke()
 
       // labels
+      ctx.save()
       const { maxY } = dataBoundaries;
-      const label = ((maxY * y) / netHeight).toString()
+      const label = ((maxY * y) / innerHeight).toString()
       ctx.strokeStyle = 'black';
       ctx.globalAlpha = 1;
       ctx.textAlign = "right";
       ctx.textBaseline = "middle";
-      ctx.fillText(label, margin - 2, netHeight - y + margin);
-
+      ctx.fillText(label,  - 2, innerHeight - y );
+      ctx.restore()
     }
   }
 
@@ -121,15 +114,25 @@ export const ChartPage = () => {
     const ctx = chartRef.current.getContext('2d');
     if (!ctx) return;
 
-    // ctx.globalAlpha = 1;
+    // inner rectangle border
     ctx.lineWidth = 1;
     ctx.strokeStyle = 'black';
-    ctx.strokeRect(margin, margin, netWidth, netHeight)
+    ctx.save()
+    ctx.translate(margin, margin)
+    ctx.strokeRect(0, 0, innerWidth, innerHeight)
 
+    // background grid
+    ctx.strokeStyle = 'grey';
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.5;
     drawXgrid(ctx);
     drawYgrid(ctx)
 
+    // chart lines
+    ctx.lineWidth = 3;
+    ctx.globalAlpha = 1;
     lines.forEach(line => drawLine({ ctx, line }))
+    ctx.restore()
 
     return () => ctx.clearRect(0, 0, width, height);
 
@@ -148,7 +151,8 @@ export const ChartPage = () => {
         </div>
       ) : (
         <canvas id="chart" ref={chartRef} height={height} width={width}
-        ></canvas>
+          // style={{ border: '1px solid black' }}
+        ></canvas >
       )}
     </>
   )

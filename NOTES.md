@@ -84,3 +84,5 @@
   - points are also not well distributed in the canvas, so they need to be normalised and scaled for better rendering
   - referencing https://www.w3schools.com/tags/ref_canvas.asp to apply some nice styling and background grids
   - in order to add data labels on left and bottom, i need to create a margin inside the canvas, at the sides. i've done it manually first, next i'll try using .translate() and .scale() as a more robust solution
+    - scale would affect also the line widths, so i'll just use translate
+  - using ctx.save() and .restore() to avoid styling code duplication
