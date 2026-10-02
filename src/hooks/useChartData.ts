@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { ChartDataResponse } from '../types'
+import type { ChartData, ChartDataResponse } from '../types'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { setData } from '../store/dataSlice'
 
@@ -37,3 +37,21 @@ export function useChartData() {
 
   return data
 }
+
+/**
+ * Test function
+ * @param data 
+ * @param factor 
+ * @returns 
+ */
+function _scalePoints(data: ChartData, factor: number) {
+  return data.map((line) => ({
+    ...line,
+    points: line.points.map((p, i) => ({
+      ...p,
+      x: p.x * factor * Math.pow(10, i),
+      y: p.y * factor * i
+    }))
+  }));
+}
+

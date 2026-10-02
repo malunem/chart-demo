@@ -89,4 +89,14 @@
   - researching how to make the canvas responsive
     - made width and height responsive with some CSS and adaptive resolution to pixel density
     - with more time I would find a way to make it scale when zooming to keep the rendering sharp instead of pixelated
+- testing the chart with different data, scaling all coordinates down by 10 -> the labels get rounded wrongly, i need to adapt the rounding based on the data range
+  -  using AI to  find an approach: with a logarithm I can find how big/small the data are, then I use the result as a multiplier for the rounding
+  - trying with very large and very small data points and data ranges
+  - large/small numbers need scientific notation
+- to draw the legend i need to keep track of the measure and position of previous items and continue from there with an appropriate spacing
+- I removed the custom aspect ratio that adapted to the device aspect ratio (eg. vertical chart on mobile) because i'm not sure it would actually be a desired behaviour in a scientific field
+- looking into adding a hover effect to show tooltips with data points coordinates
+  - i can get the offsets of the mouse hovering on the chart, with a Set of the points i could quickly check whether the mouse is on a chart point
+    - but chart points have different coords from the api so i first need to save them during the drawing
+    - found a bug in the normalization function: it was computing the range between min/max points but the axis always start from 0 so the range is actually equal to the max points
   - 

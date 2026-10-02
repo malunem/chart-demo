@@ -2,9 +2,11 @@ import { useEffect, useMemo, useRef } from 'react'
 import { useChartData } from '../hooks/useChartData'
 import { useLanguage } from '../hooks/useLanguage'
 import { LABELS } from '../i18n'
-import type { ChartData, ChartItem } from '../types'
+import type { ChartData, ChartItem, ChartPoint } from '../types'
 
 const GRID_LINES = 10;
+const LEGEND_COLOR_SIZE = 15;
+const LEGEND_ITEM_GAP = 2;
 
 /**
  * Renders Chart Page
@@ -21,22 +23,21 @@ export const ChartPage = () => {
   let margin = 20;
   let innerHeight = height - (margin * 2);
   let innerWidth = width - (margin * 2)
-  const aspectRatio = window.innerWidth / window.innerHeight
+
+  let drawnPoints: ChartPoint[] = [];
+  let dataPoints: ChartPoint[] = []
 
   const dataBoundaries = useMemo(() => getDataBoundaries(lines), [lines])
 
   const normalizePoint = ({ x, y }: { x: number, y: number }) => {
-    const { maxX, maxY, minY, minX } = dataBoundaries;
+    const { maxX, maxY } = dataBoundaries;
 
-    const rangeX = maxX - minX || 1
-    const rangeY = maxY - minY || 1
-
-    const xScale = Math.abs(innerWidth / rangeX)
-    const yScale = Math.abs(innerHeight / rangeY)
+    const xScale = innerWidth / maxX
+    const yScale = innerHeight / maxY
 
     return {
-      x: (x - minX) * xScale,
-      y: (y - minY) * yScale
+      x: (x) * xScale,
+      y: (y) * yScale
     }
   }
 
@@ -49,16 +50,19 @@ export const ChartPage = () => {
 
   const drawLine = ({ ctx, line }: { ctx: CanvasRenderingContext2D, line: ChartItem }) => {
     if (!line) return;
-
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
     ctx.strokeStyle = line.color;
     ctx.beginPath()
+
     line.points.forEach((line, i) => {
-
       const normalized = normalizePoint({ x: line.x, y: line.y });
-
       const { x, y } = cartesianToCanvas(normalized)
+      if (i === 0) console.log({ normalized, x, y })
+
+      // save drawn points and data points in arrays with same index to be used at hover to show tooltip 
+      drawnPoints.push({ x: Math.round(x + margin), y: Math.round(y + margin) })
+      dataPoints.push({ x: line.x, y: line.y })
 
       if (i === 0) ctx.moveTo(x, y)
       ctx.lineTo(x, y)
@@ -79,7 +83,9 @@ export const ChartPage = () => {
 
       // labels
       const { maxX } = dataBoundaries;
-      const label = ((Math.round(maxX / GRID_LINES / 10) * 10) * i).toString()
+      const dataLabelSteps = maxX / GRID_LINES
+      const label = formatLabelString({ dataLabelStep: dataLabelSteps, i })
+
       ctx.save()
       ctx.scale(1, 1);
       ctx.font = '1rem sans-serif'
@@ -107,7 +113,9 @@ export const ChartPage = () => {
       ctx.font = '1rem sans-serif'
 
       const { maxY } = dataBoundaries;
-      const label = ((Math.round(maxY / GRID_LINES / 10) * 10) * i).toString()
+      const dataLabelStep = getDataLabelStep(maxY)
+      const label = formatLabelString({ dataLabelStep, i })
+
       ctx.strokeStyle = 'black';
       ctx.globalAlpha = 1;
       ctx.textAlign = "right";
@@ -116,6 +124,60 @@ export const ChartPage = () => {
       ctx.restore()
     }
   }
+
+  const drawLegendItem = ({ ctx, color, label, position }: { ctx: CanvasRenderingContext2D, color: string, label: string, position: number }) => {
+
+    const x = position;
+    const y = -margin / 1.5
+    ctx.save()
+
+    // coloured square
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, LEGEND_COLOR_SIZE, LEGEND_COLOR_SIZE)
+
+    // label text
+    ctx.font = '1rem sans-serif'
+    ctx.fillStyle = 'black';
+    const labelWidth = ctx.measureText(label + ' ').width;
+    const textPosition = { x: x + LEGEND_COLOR_SIZE + LEGEND_ITEM_GAP, y: y + LEGEND_COLOR_SIZE }
+    ctx.fillText(label, textPosition.x, textPosition.y)
+    ctx.restore()
+    const nextItemPosition = textPosition.x + labelWidth + LEGEND_ITEM_GAP
+    return nextItemPosition
+  }
+
+
+  const formatLabelString = ({ dataLabelStep: dataLabelStep, i }: { dataLabelStep: number, i: number }) => {
+    const order = Math.floor(Math.log10(dataLabelStep || 1));
+    const magnitude = Math.pow(10, order);
+
+    const labelValue = ((Math.round(dataLabelStep / magnitude) * magnitude) * i);
+
+    let decimals = 0;
+    if (dataLabelStep >= 1 || dataLabelStep === 0) {
+      decimals = 0;
+    } else if (dataLabelStep >= 0.1) {
+      decimals = 1;
+    } else if (dataLabelStep >= 0.01) {
+      decimals = 2;
+    } else {
+      decimals = 3;
+    }
+
+
+    if (labelValue === 0) return '0'
+
+    if (order > 4) {
+      return new Intl.NumberFormat('en', { notation: 'scientific' }).format(labelValue)
+    }
+    if (decimals !== 0) {
+      return labelValue.toFixed(decimals);
+    }
+
+    return Math.round(labelValue).toString();
+  }
+
+
 
   useEffect(() => {
     if (!chartRef.current || !lines) return;
@@ -129,11 +191,13 @@ export const ChartPage = () => {
     // margin should be wide enough to show labels on the left
     ctx.font = '1rem sans-serif'
     const { maxY } = dataBoundaries;
-    margin = ctx.measureText((maxY).toString() + ' ').width;
+    const dataLabelStep = getDataLabelStep(maxY)
+    const label = formatLabelString({ dataLabelStep, i: 10 })
+    margin = ctx.measureText(label + ' ').width;
     innerWidth = Math.round((width - margin * 2) / 10) * 10;
     innerHeight = Math.round((height - margin * 2) / 10) * 10;
 
-    // scaled chart depending on device resolution
+    // scale chart depending on device resolution
     const dpr = window.devicePixelRatio;
     chartRef.current.width = width * dpr;
     chartRef.current.height = height * dpr;
@@ -156,8 +220,30 @@ export const ChartPage = () => {
     // chart lines
     ctx.lineWidth = 3;
     ctx.globalAlpha = 1;
-    lines.forEach(line => drawLine({ ctx, line }))
+    let nextLegendItemPosition = margin
+    lines.forEach((line) => {
+      drawLine({ ctx, line })
+
+      nextLegendItemPosition = drawLegendItem({ ctx, color: line.color, label: line.name, position: nextLegendItemPosition })
+    })
+
+    ctx.fillRect(0, 350, 2, 2)
     ctx.restore()
+
+    chartRef.current.addEventListener('mousemove', (e) => {
+      const x = e.offsetX;
+      const y = e.offsetY;
+
+      const foundPointIndex = drawnPoints.findIndex(
+        p => Math.abs(p.x - x) <= 5 && Math.abs(p.y - y) <= 5)
+      if (
+        foundPointIndex >= 0
+      ) {
+        const { x, y } = dataPoints[foundPointIndex]
+        console.log('found!:', x, y);
+      }
+    });
+
 
     return () => ctx.clearRect(0, 0, width, height);
 
@@ -178,11 +264,10 @@ export const ChartPage = () => {
         <canvas id="chart" ref={chartRef}
           height={height} width={width}
           style={{
-            // border: '1px solid black',
+            border: '1px solid black',
             marginBottom: '3rem',
-            width: '90%',
+            width: '100%',
             display: 'block',
-            aspectRatio
           }}
         ></canvas >
       )}
@@ -201,4 +286,10 @@ const getDataBoundaries = (lines: ChartData) => {
     })
   })
   return { maxX, maxY, minY, minX }
+}
+
+
+const getDataLabelStep = (max: number) => {
+  return max / GRID_LINES
+
 }
