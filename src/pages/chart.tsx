@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useChartData } from '../hooks/useChartData'
 import { useLanguage } from '../hooks/useLanguage'
 import { LABELS } from '../i18n'
@@ -17,6 +17,13 @@ export const ChartPage = () => {
   const [lang] = useLanguage()
 
   const isLoading = !chartRef && !lines
+  const [tooltip, setTooltip] = useState<{
+    show: boolean,
+    x?: number,
+    y?: number,
+    top?: number,
+    left?: number
+  }>({ show: false });
 
   let height = 500;
   let width = 800;
@@ -240,7 +247,12 @@ export const ChartPage = () => {
         foundPointIndex >= 0
       ) {
         const { x, y } = dataPoints[foundPointIndex]
-        console.log('found!:', x, y);
+        setTooltip({ show: true, left: e.clientX, top: e.clientY, x, y })
+      } else {
+        setTooltip({
+          show: false, x: undefined, y: undefined,
+          top: undefined, left: undefined
+        })
       }
     });
 
@@ -261,16 +273,37 @@ export const ChartPage = () => {
           </div>
         </div>
       ) : (
-        <canvas id="chart" ref={chartRef}
-          height={height} width={width}
-          style={{
-            border: '1px solid black',
-            marginBottom: '3rem',
-            width: '100%',
-            display: 'block',
-          }}
-        ></canvas >
+        <>
+
+          <canvas id="chart" ref={chartRef}
+            height={height} width={width}
+            style={{
+              marginBottom: '3rem',
+              width: '100%',
+              display: 'block',
+            }}
+          >
+          </canvas >
+          {tooltip.show && <div style={{
+            position: 'absolute',
+            top: tooltip.top,
+            left: tooltip.left, 
+            padding: '0.5rem',
+            background: 'white',
+            border: '1px solid grey',
+            borderRadius: '10%'
+          }}>
+            <span>
+              x: {tooltip.x}
+            </span><br />
+            <span>
+              y: {tooltip.y}
+            </span>
+          </div>}
+
+        </>
       )}
+      { }
     </>
   )
 }
