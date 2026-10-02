@@ -4,6 +4,8 @@ import { useLanguage } from '../hooks/useLanguage'
 import { LABELS } from '../i18n'
 import type { ChartData, ChartItem } from '../types'
 
+const GRID_LINES = 10;
+
 /**
  * Renders Chart Page
  */
@@ -14,14 +16,14 @@ export const ChartPage = () => {
 
   const isLoading = !chartRef && !lines
 
-  const height = 500;
-  const width = 800;
-  const margin = 20;
-  const innerHeight = height - (margin * 2);
-  const innerWidth = width - (margin * 2)
+  let height = 500;
+  let width = 800;
+  let margin = 20;
+  let innerHeight = height - (margin * 2);
+  let innerWidth = width - (margin * 2)
+  const aspectRatio = window.innerWidth / window.innerHeight
 
   const dataBoundaries = useMemo(() => getDataBoundaries(lines), [lines])
-
 
   const normalizePoint = ({ x, y }: { x: number, y: number }) => {
     const { maxX, maxY, minY, minX } = dataBoundaries;
@@ -40,15 +42,16 @@ export const ChartPage = () => {
 
   const cartesianToCanvas = ({ x, y }: { x: number, y: number }) => {
     return {
-      x: x ,
-      y: innerHeight - y 
+      x: x,
+      y: innerHeight - y
     }
   }
 
   const drawLine = ({ ctx, line }: { ctx: CanvasRenderingContext2D, line: ChartItem }) => {
     if (!line) return;
 
-
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
     ctx.strokeStyle = line.color;
     ctx.beginPath()
     line.points.forEach((line, i) => {
@@ -65,45 +68,51 @@ export const ChartPage = () => {
   }
 
   const drawXgrid = (ctx: CanvasRenderingContext2D) => {
-    const xPointsDistance = innerWidth / 10;
-    for (let x = xPointsDistance; x <= innerWidth; x += xPointsDistance) {
+    const xPointsDistance = Math.round(innerWidth / GRID_LINES);
+    for (let i = 1; i <= GRID_LINES; i++) {
+      const x = i * xPointsDistance;
+
       ctx.beginPath()
-      ctx.moveTo(x , 0)
-      ctx.lineTo(x , innerHeight )
+      ctx.moveTo(x, 0)
+      ctx.lineTo(x, innerHeight)
       ctx.stroke()
 
       // labels
       const { maxX } = dataBoundaries;
-      const label = ((maxX * x) / innerWidth).toString()
+      const label = ((Math.round(maxX / GRID_LINES / 10) * 10) * i).toString()
       ctx.save()
+      ctx.scale(1, 1);
+      ctx.font = '1rem sans-serif'
       ctx.strokeStyle = 'black';
       ctx.globalAlpha = 1;
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
-      ctx.fillText(label, x , innerHeight  + 2);
+      ctx.fillText(label, x, innerHeight + 2);
       ctx.restore()
     }
   }
 
   const drawYgrid = (ctx: CanvasRenderingContext2D) => {
-    const yPointsDistance = innerHeight / 10;
-    console.log({ yPointsDistance, netHeight: innerHeight })
-    for (let y = yPointsDistance; y <= innerHeight; y += yPointsDistance) {
-
+    const yPointsDistance = Math.round(innerHeight / GRID_LINES);
+    for (let i = 0; i <= GRID_LINES; i++) {
+      const y = i * yPointsDistance;
       ctx.beginPath()
-      ctx.moveTo(0, y)
-      ctx.lineTo(innerWidth, y)
+      ctx.moveTo(0, innerHeight - y)
+      ctx.lineTo(innerWidth, innerHeight - y)
       ctx.stroke()
 
       // labels
       ctx.save()
+      ctx.scale(1, 1);
+      ctx.font = '1rem sans-serif'
+
       const { maxY } = dataBoundaries;
-      const label = ((maxY * y) / innerHeight).toString()
+      const label = ((Math.round(maxY / GRID_LINES / 10) * 10) * i).toString()
       ctx.strokeStyle = 'black';
       ctx.globalAlpha = 1;
       ctx.textAlign = "right";
-      ctx.textBaseline = "middle";
-      ctx.fillText(label,  - 2, innerHeight - y );
+      i === 0 ? ctx.textBaseline = 'top' : ctx.textBaseline = "middle";
+      ctx.fillText(label, - 2, innerHeight - y);
       ctx.restore()
     }
   }
@@ -113,6 +122,22 @@ export const ChartPage = () => {
 
     const ctx = chartRef.current.getContext('2d');
     if (!ctx) return;
+
+    width = chartRef.current.clientWidth;
+    height = chartRef.current.clientHeight;
+
+    // margin should be wide enough to show labels on the left
+    ctx.font = '1rem sans-serif'
+    const { maxY } = dataBoundaries;
+    margin = ctx.measureText((maxY).toString() + ' ').width;
+    innerWidth = Math.round((width - margin * 2) / 10) * 10;
+    innerHeight = Math.round((height - margin * 2) / 10) * 10;
+
+    // scaled chart depending on device resolution
+    const dpr = window.devicePixelRatio;
+    chartRef.current.width = width * dpr;
+    chartRef.current.height = height * dpr;
+    ctx.scale(dpr, dpr);
 
     // inner rectangle border
     ctx.lineWidth = 1;
@@ -136,7 +161,7 @@ export const ChartPage = () => {
 
     return () => ctx.clearRect(0, 0, width, height);
 
-  }, [lines, chartRef])
+  }, [lines, chartRef.current])
 
   return (
     <>
@@ -150,8 +175,15 @@ export const ChartPage = () => {
           </div>
         </div>
       ) : (
-        <canvas id="chart" ref={chartRef} height={height} width={width}
-          // style={{ border: '1px solid black' }}
+        <canvas id="chart" ref={chartRef}
+          height={height} width={width}
+          style={{
+            // border: '1px solid black',
+            marginBottom: '3rem',
+            width: '90%',
+            display: 'block',
+            aspectRatio
+          }}
         ></canvas >
       )}
     </>
@@ -169,5 +201,4 @@ const getDataBoundaries = (lines: ChartData) => {
     })
   })
   return { maxX, maxY, minY, minX }
-
 }

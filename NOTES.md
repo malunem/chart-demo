@@ -86,3 +86,7 @@
   - in order to add data labels on left and bottom, i need to create a margin inside the canvas, at the sides. i've done it manually first, next i'll try using .translate() and .scale() as a more robust solution
     - scale would affect also the line widths, so i'll just use translate
   - using ctx.save() and .restore() to avoid styling code duplication
+  - researching how to make the canvas responsive
+    - made width and height responsive with some CSS and adaptive resolution to pixel density
+    - with more time I would find a way to make it scale when zooming to keep the rendering sharp instead of pixelated
+  - 
