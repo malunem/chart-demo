@@ -31,37 +31,40 @@ export const SettingsPage = () => {
   return (
     <div>
       <h1>{LABELS[lang].settings}</h1>
-      <div
-        className="container-fluid border py-4 rounded bg-secondary-subtle
-">
-        <div className="form-check form-switch">
-          <input
-            className="form-check-input"
-            type="checkbox"
-            role="switch"
-            id={theme === 'dark' ? 'switchCheckDefault' : 'switchCheckChecked'}
-            onChange={toggleTheme}
-          />
-          <label className="form-check-label" htmlFor="switchCheckDefault">
+      <div>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center'
+          }}>
+          <div style={{ marginRight: '5px' }}>{LABELS[lang].color}: </div>
+          <input type="checkbox" role="switch" onChange={toggleTheme} />
+          <label>
             {theme === 'dark' ? getThemeLabel('light') : getThemeLabel('dark')}
           </label>
         </div>
-        <select
-          className="form-select mt-4 w-auto"
-          aria-label="Language select"
-          defaultValue="Select Language"
-          id="language-select"
-          onChange={handleSelect}>
-          <>
-            {LANGUAGE_KEYS.map((langKey) => {
-              return (
-                <option selected={langKey === lang} key={langKey} value={LANGUAGES[langKey].value}>
-                  {LANGUAGES[langKey].label}
-                </option>
-              )
-            })}
-          </>
-        </select>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center'
+          }}>
+          <div style={{ marginRight: '5px' }}>{LABELS[lang].language}: </div>
+
+          <select aria-label="Language select" onChange={handleSelect}>
+            <>
+              {LANGUAGE_KEYS.map((langKey) => {
+                return (
+                  <option
+                    selected={langKey === lang}
+                    key={langKey}
+                    value={LANGUAGES[langKey].value}>
+                    {LANGUAGES[langKey].label}
+                  </option>
+                )
+              })}
+            </>
+          </select>
+        </div>
       </div>
     </div>
   )

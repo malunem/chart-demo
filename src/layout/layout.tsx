@@ -12,13 +12,17 @@ export const Layout = () => {
 
   useEffect(() => {
     const html = document.documentElement
-    html.setAttribute('data-bs-theme', theme)
+    html.setAttribute('class', `${theme}-theme`)
   }, [theme])
 
   return (
     <div id="layout">
       <Navbar />
-      <div className="container-fluid px-4">
+      <div
+        style={{
+          marginLeft: '2vw',
+          marginRight: '2vw'
+        }}>
         <ErrorBoundary>
           <Outlet />
         </ErrorBoundary>

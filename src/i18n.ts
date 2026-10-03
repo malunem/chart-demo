@@ -7,6 +7,8 @@ type Labels = {
   switchToTheme: string
   dark: string
   light: string
+  language: string
+  color: string
 }
 
 type LabelsI18n = {
@@ -22,7 +24,9 @@ export const LABELS: LabelsI18n = {
     export: 'Export',
     switchToTheme: `Switch to ${THEME_PLACEHOLDER} theme`,
     dark: 'dark',
-    light: 'light'
+    light: 'light',
+    language: 'Language',
+    color: 'Colour'
   },
   it: {
     chart: 'Grafico',
@@ -30,6 +34,8 @@ export const LABELS: LabelsI18n = {
     export: 'Esporta',
     switchToTheme: `Passa al tema ${THEME_PLACEHOLDER}`,
     dark: 'scuro',
-    light: 'chiaro'
+    light: 'chiaro',
+    language: 'Lingua',
+    color: 'Colore'
   }
 }

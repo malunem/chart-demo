@@ -1,0 +1,100 @@
+$bg-white: #f0f0f0;
+$bg-light: rgba(228, 234, 235, 0.523);
+$bg-black: #212529;
+$bg-dark: #2b3035;
+$border: 1px solid;
+$text-dark: black;
+$text-light: white;
+$border-light: lightgrey;
+$border-dark: rgb(39, 38, 38);
+$font-size: 1.2rem;
+
+body {
+  margin: 0;
+  font-family: sans-serif;
+  font-size: $font-size;
+}
+
+li {
+  list-style-type: none;
+  opacity: 70%;
+}
+
+button {
+  border: none;
+  opacity: 70%;
+}
+
+input[type='checkbox'] {
+  height: 1.2rem;
+  width: 1.2rem;
+
+  &:checked {
+    accent-color: $bg-light;
+    color: $text-dark;
+  }
+}
+
+select {
+  padding: 3px;
+  height: auto;
+  width: auto;
+  font-size: $font-size;
+}
+
+.light-theme {
+  background-color: $bg-white;
+  color: $text-dark;
+
+  li a {
+    color: $text-dark;
+  }
+
+  select {
+    background-color: $bg-light;
+    color: $text-dark;
+  }
+
+  .navbar {
+    background-color: $bg-light;
+  }
+
+  .menu-border {
+    border-color: $border-light;
+  }
+
+  .tooltip {
+    background: $bg-light;
+  }
+}
+
+.dark-theme {
+  background-color: $bg-black;
+  color: $text-light;
+
+  li a {
+    color: $text-light;
+  }
+
+  select {
+    background-color: $bg-dark;
+    color: $text-light;
+    border-color: $border-dark;
+  }
+
+  .navbar {
+    background-color: $bg-dark;
+  }
+
+  .menu-border {
+    border-color: $border-dark;
+  }
+
+  .tooltip {
+    background: $bg-dark;
+  }
+}
+
+.navbar {
+  padding: 2vw;
+}
