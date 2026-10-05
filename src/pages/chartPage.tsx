@@ -31,42 +31,43 @@ export const ChartPage = () => {
   const isLoading = !chartRef && !lines
   const [tooltip, setTooltip] = useState<TooltipProps>({ show: false })
 
-  let height = 500
-  let width = 800
-  let margin = 20
-  let innerHeight = height - margin * 2
-  // let innerWidth = width - margin * 2
+  const [height, setHeight] = useState(500)
+  const [width, setWidth] = useState(800)
 
-  const drawnPoints: ChartPoint[] = []
-  const dataPoints: ChartPoint[] = []
 
   const dataBoundaries = useMemo(() => getDataBoundaries(lines), [lines])
 
   useEffect(() => {
-    if (!chartRef.current || !lines) return
+    const drawnPoints: ChartPoint[] = []
+    const dataPoints: ChartPoint[] = []
 
-    const ctx = chartRef.current.getContext('2d')
+    const canvas = chartRef.current
+    if (!canvas || !lines) return
+
+    const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    width = chartRef.current.clientWidth
-    height = chartRef.current.clientHeight
+    const width = canvas.clientWidth
+    const height = canvas.clientHeight
+    setWidth(width)
+    setHeight(height)
 
     // margin should be wide enough to show labels on the left
     ctx.font = '1rem sans-serif'
     const { maxY } = dataBoundaries
     const dataLabelStep = getDataLabelStep(maxY)
     const label = formatLabelString({ dataLabelStep, i: 10 })
-    margin = ctx.measureText(label + ' ').width
-    innerWidth = Math.round((width - margin * 2) / 10) * 10
-    innerHeight = Math.round((height - margin * 2) / 10) * 10
+    const margin = ctx.measureText(label + ' ').width
+    const innerWidth = Math.round((width - margin * 2) / 10) * 10
+    const innerHeight = Math.round((height - margin * 2) / 10) * 10
 
     scaleChart({ ctx, chartRef, width, height })
 
     ctx.lineWidth = 1
     ctx.strokeStyle = getCanvasBaseColor(theme)
     ctx.save()
-    drawInnerBorder({ ctx, margin })
-    drawBackgroundGrid({ ctx, dataBoundaries, theme })
+    drawInnerBorder({ ctx, margin, innerWidth, innerHeight })
+    drawBackgroundGrid({ ctx, dataBoundaries, theme, innerWidth, innerHeight })
     drawChartLines({
       ctx,
       margin,
@@ -75,16 +76,21 @@ export const ChartPage = () => {
       lines,
       dataBoundaries,
       theme,
-      innerHeight
+      innerHeight,
+      innerWidth
     })
     ctx.restore()
 
-    chartRef.current.addEventListener('pointermove', (e) => {
+    const handlePointerMove = (e: PointerEvent) => {
       findPointAndShowTooltip({ e, drawnPoints, dataPoints, setTooltip })
-    })
+    }
+    canvas.addEventListener('pointermove', handlePointerMove)
 
-    return () => ctx.clearRect(0, 0, width, height)
-  }, [lines, theme])
+    return () => {
+      canvas.removeEventListener('pointermove', handlePointerMove)
+      ctx.clearRect(0, 0, width, height)
+    }
+  }, [lines, theme, width, height])
 
   return (
     <>

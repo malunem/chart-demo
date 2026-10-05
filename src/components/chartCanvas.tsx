@@ -2,6 +2,9 @@ import type { ChartRef } from '../types'
 
 type ChartCanvasProps = { ref: ChartRef; height: number; width: number }
 
+/**
+ * Renders html canvas as the chart's drawing surface
+ */
 export const ChartCanvas = ({ ref, height, width }: ChartCanvasProps) => {
   return (
     <canvas
@@ -12,7 +15,8 @@ export const ChartCanvas = ({ ref, height, width }: ChartCanvasProps) => {
       style={{
         marginBottom: '3rem',
         width: '100%',
-        display: 'block'
+        display: 'block',
+        touchAction: 'none'
       }}></canvas>
   )
 }
