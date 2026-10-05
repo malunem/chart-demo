@@ -33,9 +33,7 @@ export const Navbar = () => {
           Brainomix
         </div>
         <button
-          className="navbar-toggler"
           type="button"
-          aria-expanded="false"
           aria-label="Toggle navigation"
           onClick={() => setOpen(!isOpen)}
           style={{
@@ -58,16 +56,12 @@ export const Navbar = () => {
             textAlign: 'right'
           }}
           onClick={() => setOpen(false)}>
-          <ul >
-            <li >
-              <Link to="/chart">
-                {langLabels.chart}
-              </Link>
+          <ul>
+            <li>
+              <Link to="/chart">{langLabels.chart}</Link>
             </li>
             <li>
-              <Link to="/settings">
-                {langLabels.settings}
-              </Link>
+              <Link to="/settings">{langLabels.settings}</Link>
             </li>
           </ul>
         </div>

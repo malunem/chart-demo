@@ -99,4 +99,8 @@
   - i can get the offsets of the mouse hovering on the chart, with a Set of the points i could quickly check whether the mouse is on a chart point
     - but chart points have different coords from the api so i first need to save them during the drawing
     - found a bug in the normalization function: it was computing the range between min/max points but the axis always start from 0 so the range is actually equal to the max points
-  -
+
+---
+
+- Reached feature parity with the previous version with Chart.JS and Boostrap via CDN (dynamic axes and unit measures, points tooltip at hover, dark/light theme...)
+- Now tidying up code and refactoring for maintanibility and readability

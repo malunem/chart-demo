@@ -4,6 +4,7 @@ import { useTheme } from '../hooks/useTheme'
 import { LABELS, THEME_PLACEHOLDER } from '../i18n'
 import { LANGUAGE_KEYS, LANGUAGES } from '../store/languageSlice'
 import type { Language, Theme } from '../types'
+import { PageTitle } from '../layout/pageTitle'
 
 /**
  * Renders Settings Page, with light/dark mode switch and language selector
@@ -30,7 +31,7 @@ export const SettingsPage = () => {
 
   return (
     <div>
-      <h1>{LABELS[lang].settings}</h1>
+      <PageTitle title={LABELS[lang].settings} />
       <div>
         <div
           style={{
@@ -38,8 +39,8 @@ export const SettingsPage = () => {
             alignItems: 'center'
           }}>
           <div style={{ marginRight: '5px' }}>{LABELS[lang].color}: </div>
-          <input type="checkbox" role="switch" onChange={toggleTheme} />
-          <label>
+          <input id="theme-toggler" type="checkbox" role="switch" onChange={toggleTheme} />
+          <label htmlFor="theme-toggler">
             {theme === 'dark' ? getThemeLabel('light') : getThemeLabel('dark')}
           </label>
         </div>

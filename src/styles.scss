@@ -17,12 +17,15 @@ body {
 
 li {
   list-style-type: none;
-  opacity: 70%;
+  opacity: 80%;
 }
 
 button {
   border: none;
-  opacity: 70%;
+  opacity: 80%;
+  &:hover {
+    cursor: pointer;
+  }
 }
 
 input[type='checkbox'] {

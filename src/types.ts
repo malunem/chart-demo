@@ -19,3 +19,8 @@ export type ChartDataResponse = {
 export type Theme = 'light' | 'dark'
 
 export type Language = 'en' | 'it'
+
+export type DataBoundaries = {
+  maxX: number
+  maxY: number
+}
