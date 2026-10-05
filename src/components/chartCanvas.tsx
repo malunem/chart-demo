@@ -15,6 +15,7 @@ export const ChartCanvas = ({ ref, height, width }: ChartCanvasProps) => {
       style={{
         marginBottom: '3rem',
         width: '100%',
+        maxHeight: '90vh',
         display: 'block',
         touchAction: 'none'
       }}></canvas>
