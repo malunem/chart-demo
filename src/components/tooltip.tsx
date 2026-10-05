@@ -10,7 +10,8 @@ export type TooltipProps = {
  * Renders an absolute-positioned tooltip with `x` and `y` coordinates of the hovered point. Doesn't render anything if any of the params is missing or `show` is `false`.
  */
 export const Tooltip = ({ show, top, left, x, y }: TooltipProps) => {
-  if (!show || top === undefined || left === undefined || x === undefined || y === undefined) return <></>
+  if (!show || top === undefined || left === undefined || x === undefined || y === undefined)
+    return <></>
 
   return (
     <div

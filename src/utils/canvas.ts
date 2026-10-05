@@ -56,7 +56,7 @@ export const scaleDataPointToPixel = ({
 }
 
 /**
- * The cartesian axes origin is bottom left, whilst the canvas origin is top left. Flips `y` around `innerHeight` and returns the point, with `x` unchanged 
+ * The cartesian axes origin is bottom left, whilst the canvas origin is top left. Flips `y` around `innerHeight` and returns the point, with `x` unchanged
  */
 export const cartesianToCanvas = ({
   x,
@@ -170,6 +170,11 @@ type DrawLegendItemParams = {
   margin: number
   theme: Theme
 }
+
+/**
+ * Draws a legend item (coloured square + line name) at the top of the chart.
+ * @returns the computed `x` position for the next legend item.
+ */
 const drawLegendItem = ({ ctx, color, label, position, margin, theme }: DrawLegendItemParams) => {
   const x = position
   const y = -margin / 1.5
@@ -194,6 +199,9 @@ interface DrawLinesParams extends Omit<DrawLineParams, 'line'> {
   lines: ChartData
 }
 
+/**
+ * Draws every chart line and its legend item.
+ */
 export const drawLines = ({
   ctx,
   lines,
@@ -232,13 +240,17 @@ export const drawLines = ({
   })
 }
 
+/**
+ * Formats the label for the `i`th grid line.
+ * @returns the label as a string: a plain integer, a fixed decimals, or scientific notation depending on the step's order of magnitude.
+ */
 export const formatLabelString = ({
-  dataLabelStep: dataLabelStep,
+  dataLabelStep,
   i
 }: {
   dataLabelStep: number
   i: number
-}) => {
+}): string => {
   const order = Math.floor(Math.log10(dataLabelStep || 1))
   const magnitude = Math.pow(10, order)
 
@@ -275,6 +287,9 @@ type DrawGridParams = {
   innerHeight: number
 }
 
+/**
+ * Draws the vertical grid lines, with the `i`th label under each one.
+ */
 const drawXgrid = ({ ctx, dataBoundaries, theme, innerWidth, innerHeight }: DrawGridParams) => {
   const xPointsDistance = Math.round(innerWidth / GRID_LINES)
   for (let i = 1; i <= GRID_LINES; i++) {
@@ -302,6 +317,9 @@ const drawXgrid = ({ ctx, dataBoundaries, theme, innerWidth, innerHeight }: Draw
   }
 }
 
+/**
+ * Draws the horizontal grid lines, with the `i`th label to the left of each one.
+ */
 const drawYgrid = ({ ctx, dataBoundaries, theme, innerWidth, innerHeight }: DrawGridParams) => {
   const yPointsDistance = Math.round(innerHeight / GRID_LINES)
   for (let i = 0; i <= GRID_LINES; i++) {
@@ -327,7 +345,9 @@ const drawYgrid = ({ ctx, dataBoundaries, theme, innerWidth, innerHeight }: Draw
     ctx.restore()
   }
 }
-
+/**
+ * Draws the vertical and horizontal grid lines, with the `i`th label for each one.
+ */
 export const drawBackgroundGrid = ({
   ctx,
   dataBoundaries,
@@ -389,6 +409,9 @@ export const drawInnerBorder = ({
   ctx.strokeRect(0, 0, innerWidth, innerHeight)
 }
 
+/**
+ * Base canvas colour: `black` on the light theme, `white` otherwise.
+ */
 export const getCanvasBaseColor = (theme: Theme) => {
   return theme === 'light' ? 'black' : 'white'
 }
