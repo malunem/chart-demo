@@ -1,3 +1,5 @@
+import type { RefObject } from 'react'
+
 export type ChartPoint = {
   x: number
   y: number
@@ -24,3 +26,5 @@ export type DataBoundaries = {
   maxX: number
   maxY: number
 }
+
+export type ChartRef = RefObject<HTMLCanvasElement | null>

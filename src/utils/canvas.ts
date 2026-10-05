@@ -1,16 +1,16 @@
-import type { Dispatch, SetStateAction } from "react"
-import type { TooltipProps } from "../components/tooltip"
-import type { ChartData, ChartItem, ChartPoint, DataBoundaries } from "../types"
+import type { Dispatch, SetStateAction } from 'react'
+import type { TooltipProps } from '../components/tooltip'
+import type { ChartData, ChartItem, ChartPoint, ChartRef, DataBoundaries, Theme } from '../types'
 
 export const GRID_LINES = 10
 const LEGEND_COLOR_SIZE = 15
 const LEGEND_ITEM_GAP = 2
 
 /**
-* Largest `x` and `y` across every series to identify the top value of both axes
-* @param lines all series with their points
-* @returns `maxX` and `maxY`, both `0` when `lines` is empty or `null`.
-*/
+ * Largest `x` and `y` across every series to identify the top value of both axes
+ * @param lines all series with their points
+ * @returns `maxX` and `maxY`, both `0` when `lines` is empty or `null`.
+ */
 export const getDataBoundaries = (lines: ChartData): DataBoundaries => {
   if (!lines?.length) return { maxX: 0, maxY: 0 }
 
@@ -28,7 +28,15 @@ export const getDataBoundaries = (lines: ChartData): DataBoundaries => {
   }
 }
 
-export const normalizePoint = ({ x, y, dataBoundaries }: { x: number; y: number, dataBoundaries: DataBoundaries }) => {
+export const normalizePoint = ({
+  x,
+  y,
+  dataBoundaries
+}: {
+  x: number
+  y: number
+  dataBoundaries: DataBoundaries
+}) => {
   const { maxX, maxY } = dataBoundaries
 
   const xScale = innerWidth / maxX
@@ -40,21 +48,41 @@ export const normalizePoint = ({ x, y, dataBoundaries }: { x: number; y: number,
   }
 }
 
-export const cartesianToCanvas = ({ x, y, innerHeight }: { x: number; y: number, innerHeight: number }) => {
+export const cartesianToCanvas = ({
+  x,
+  y,
+  innerHeight
+}: {
+  x: number
+  y: number
+  innerHeight: number
+}) => {
   return {
     x: x,
     y: innerHeight - y
   }
 }
 
-type DrawLineProps = {
-  ctx: CanvasRenderingContext2D; line: ChartItem, dataBoundaries: DataBoundaries,
-  drawnPoints: ChartPoint[],
-  dataPoints: ChartPoint[],
+type DrawLineParams = {
+  ctx: CanvasRenderingContext2D
+  line: ChartItem
+  dataBoundaries: DataBoundaries
+  drawnPoints: ChartPoint[]
+  dataPoints: ChartPoint[]
   margin: number
+  theme: Theme
+  innerHeight: number
 }
 
-export const drawLine = ({ ctx, line, dataBoundaries, drawnPoints, dataPoints, margin }: DrawLineProps) => {
+export const drawLine = ({
+  ctx,
+  line,
+  dataBoundaries,
+  drawnPoints,
+  dataPoints,
+  margin,
+  innerHeight
+}: DrawLineParams) => {
   if (!line) return
   ctx.lineJoin = 'round'
   ctx.lineCap = 'round'
@@ -76,14 +104,19 @@ export const drawLine = ({ ctx, line, dataBoundaries, drawnPoints, dataPoints, m
   ctx.stroke()
 }
 
-type FindPointAndShowTooltipProps = {
-  e: MouseEvent,
-  drawnPoints: ChartPoint[],
-  dataPoints: ChartPoint[],
+type FindPointAndShowTooltipParams = {
+  e: MouseEvent
+  drawnPoints: ChartPoint[]
+  dataPoints: ChartPoint[]
   setTooltip: Dispatch<SetStateAction<TooltipProps>>
 }
 
-export const findPointAndShowTooltip = ({ e, drawnPoints, dataPoints, setTooltip }: FindPointAndShowTooltipProps) => {
+export const findPointAndShowTooltip = ({
+  e,
+  drawnPoints,
+  dataPoints,
+  setTooltip
+}: FindPointAndShowTooltipParams) => {
   const x = e.offsetX
   const y = e.offsetY
 
@@ -104,23 +137,15 @@ export const findPointAndShowTooltip = ({ e, drawnPoints, dataPoints, setTooltip
   }
 }
 
-type DrawLegendItemProps = {
+type DrawLegendItemParams = {
   ctx: CanvasRenderingContext2D
   color: string
   label: string
   position: number
   margin: number
+  theme: Theme
 }
-const drawLegendItem = ({
-  ctx,
-  color,
-  label,
-  position,
-  margin
-}: DrawLegendItemProps) => {
-
-
-
+const drawLegendItem = ({ ctx, color, label, position, margin, theme }: DrawLegendItemParams) => {
   const x = position
   const y = -margin / 1.5
   ctx.save()
@@ -131,7 +156,7 @@ const drawLegendItem = ({
 
   // label text
   ctx.font = '1rem sans-serif'
-  ctx.fillStyle = useCanvasBaseColor()
+  ctx.fillStyle = getCanvasBaseColor(theme)
   const labelWidth = ctx.measureText(label + ' ').width
   const textPosition = { x: x + LEGEND_COLOR_SIZE + LEGEND_ITEM_GAP, y: y + LEGEND_COLOR_SIZE }
   ctx.fillText(label, textPosition.x, textPosition.y)
@@ -140,29 +165,79 @@ const drawLegendItem = ({
   return nextItemPosition
 }
 
-
-interface DrawLinesProps extends Omit<DrawLineProps, 'line'> {
+interface DrawLinesParams extends Omit<DrawLineParams, 'line'> {
   lines: ChartData
 }
 
-export const drawLines = ({ ctx, lines, margin, dataBoundaries, drawnPoints, dataPoints }: DrawLinesProps) => {
+export const drawLines = ({
+  ctx,
+  lines,
+  margin,
+  dataBoundaries,
+  drawnPoints,
+  dataPoints,
+  theme,
+  innerHeight
+}: DrawLinesParams) => {
   ctx.lineWidth = 3
   ctx.globalAlpha = 1
   let nextLegendItemPosition = margin
   lines.forEach((line) => {
-    drawLine({ ctx, line, dataBoundaries, drawnPoints, dataPoints, margin })
+    drawLine({ ctx, line, dataBoundaries, drawnPoints, dataPoints, margin, theme, innerHeight })
 
     nextLegendItemPosition = drawLegendItem({
       ctx,
       color: line.color,
       label: line.name,
-      position: nextLegendItemPosition
+      position: nextLegendItemPosition,
+      margin,
+      theme
     })
   })
 }
 
+export const formatLabelString = ({
+  dataLabelStep: dataLabelStep,
+  i
+}: {
+  dataLabelStep: number
+  i: number
+}) => {
+  const order = Math.floor(Math.log10(dataLabelStep || 1))
+  const magnitude = Math.pow(10, order)
 
-const drawXgrid = (ctx: CanvasRenderingContext2D) => {
+  const labelValue = Math.round(dataLabelStep / magnitude) * magnitude * i
+
+  let decimals = 0
+  if (dataLabelStep >= 1 || dataLabelStep === 0) {
+    decimals = 0
+  } else if (dataLabelStep >= 0.1) {
+    decimals = 1
+  } else if (dataLabelStep >= 0.01) {
+    decimals = 2
+  } else {
+    decimals = 3
+  }
+
+  if (labelValue === 0) return '0'
+
+  if (order > 4) {
+    return new Intl.NumberFormat('en', { notation: 'scientific' }).format(labelValue)
+  }
+  if (decimals !== 0) {
+    return labelValue.toFixed(decimals)
+  }
+
+  return Math.round(labelValue).toString()
+}
+
+type DrawGridParams = {
+  ctx: CanvasRenderingContext2D
+  dataBoundaries: DataBoundaries
+  theme: Theme
+}
+
+const drawXgrid = ({ ctx, dataBoundaries, theme }: DrawGridParams) => {
   const xPointsDistance = Math.round(innerWidth / GRID_LINES)
   for (let i = 1; i <= GRID_LINES; i++) {
     const x = i * xPointsDistance
@@ -180,7 +255,7 @@ const drawXgrid = (ctx: CanvasRenderingContext2D) => {
     ctx.save()
     ctx.scale(1, 1)
     ctx.font = '1rem sans-serif'
-    ctx.fillStyle = useCanvasBaseColor()
+    ctx.fillStyle = getCanvasBaseColor(theme)
     ctx.globalAlpha = 1
     ctx.textAlign = 'center'
     ctx.textBaseline = 'top'
@@ -189,8 +264,7 @@ const drawXgrid = (ctx: CanvasRenderingContext2D) => {
   }
 }
 
-const drawYgrid = (ctx: CanvasRenderingContext2D) => {
-
+const drawYgrid = ({ ctx, dataBoundaries, theme }: DrawGridParams) => {
   const yPointsDistance = Math.round(innerHeight / GRID_LINES)
   for (let i = 0; i <= GRID_LINES; i++) {
     const y = i * yPointsDistance
@@ -207,7 +281,7 @@ const drawYgrid = (ctx: CanvasRenderingContext2D) => {
     const { maxY } = dataBoundaries
     const dataLabelStep = getDataLabelStep(maxY)
     const label = formatLabelString({ dataLabelStep, i })
-    ctx.fillStyle = useCanvasBaseColor()
+    ctx.fillStyle = getCanvasBaseColor(theme)
     ctx.globalAlpha = 1
     ctx.textAlign = 'right'
     i === 0 ? (ctx.textBaseline = 'top') : (ctx.textBaseline = 'middle')
@@ -216,21 +290,55 @@ const drawYgrid = (ctx: CanvasRenderingContext2D) => {
   }
 }
 
-
-export const drawBackgroundGrid = ({ ctx }) => {
+export const drawBackgroundGrid = ({ ctx, dataBoundaries, theme }: DrawGridParams) => {
   ctx.strokeStyle = 'grey'
   ctx.lineWidth = 1
   ctx.globalAlpha = 0.5
-  drawXgrid(ctx)
-  drawYgrid(ctx)
+  drawXgrid({ ctx, dataBoundaries, theme })
+  drawYgrid({ ctx, dataBoundaries, theme })
 }
 
 /**
-* /**
-* Spacing between grid lines: `max` split into `GRID_LINES` equal parts.
-* @param max top of the axis range
-* @returns the step distance between grid lines
-*/
+ * /**
+ * Spacing between grid lines: `max` split into `GRID_LINES` equal parts.
+ * @param max top of the axis range
+ * @returns the step distance between grid lines
+ */
 export const getDataLabelStep = (max: number) => {
   return max / GRID_LINES
+}
+
+type ScaleChartParams = {
+  ctx: CanvasRenderingContext2D
+  chartRef: ChartRef
+  width: number
+  height: number
+}
+
+/**
+ * Scale chart depending on device resolution
+ * @param param0
+ */
+export const scaleChart = ({ ctx, chartRef, width, height }: ScaleChartParams) => {
+  const dpr = window.devicePixelRatio
+  if (chartRef.current) {
+    chartRef.current.width = width * dpr
+    chartRef.current.height = height * dpr
+  }
+  ctx.scale(dpr, dpr)
+}
+
+export const drawInnerBorder = ({
+  ctx,
+  margin
+}: {
+  ctx: CanvasRenderingContext2D
+  margin: number
+}) => {
+  ctx.translate(margin, margin)
+  ctx.strokeRect(0, 0, innerWidth, innerHeight)
+}
+
+export const getCanvasBaseColor = (theme: Theme) => {
+  return theme === 'light' ? 'black' : 'white'
 }

@@ -1,12 +1,18 @@
-import type { RefObject } from "react"
+import type { ChartRef } from '../types'
 
-export const ChartCanvas = ({ ref }: { ref: RefObject<HTMLCanvasElement | null> }) => {
-  return <canvas
-    id="chart"
-    ref={ref}
-    style={{
-      marginBottom: '3rem',
-      width: '100%',
-      display: 'block'
-    }}></canvas>
+type ChartCanvasProps = { ref: ChartRef; height: number; width: number }
+
+export const ChartCanvas = ({ ref, height, width }: ChartCanvasProps) => {
+  return (
+    <canvas
+      id="chart"
+      ref={ref}
+      height={height}
+      width={width}
+      style={{
+        marginBottom: '3rem',
+        width: '100%',
+        display: 'block'
+      }}></canvas>
+  )
 }
