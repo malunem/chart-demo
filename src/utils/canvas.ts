@@ -31,11 +31,15 @@ export const getDataBoundaries = (lines: ChartData): DataBoundaries => {
 export const normalizePoint = ({
   x,
   y,
-  dataBoundaries
+  dataBoundaries,
+  innerWidth,
+  innerHeight
 }: {
   x: number
   y: number
   dataBoundaries: DataBoundaries
+  innerWidth: number
+  innerHeight: number
 }) => {
   const { maxX, maxY } = dataBoundaries
 
@@ -72,6 +76,7 @@ type DrawLineParams = {
   margin: number
   theme: Theme
   innerHeight: number
+  innerWidth: number
 }
 
 export const drawLine = ({
@@ -81,7 +86,8 @@ export const drawLine = ({
   drawnPoints,
   dataPoints,
   margin,
-  innerHeight
+  innerHeight,
+  innerWidth
 }: DrawLineParams) => {
   if (!line) return
   ctx.lineJoin = 'round'
@@ -90,7 +96,13 @@ export const drawLine = ({
   ctx.beginPath()
 
   line.points.forEach((line, i) => {
-    const normalized = normalizePoint({ x: line.x, y: line.y, dataBoundaries })
+    const normalized = normalizePoint({
+      x: line.x,
+      y: line.y,
+      dataBoundaries,
+      innerWidth,
+      innerHeight
+    })
     const { x, y } = cartesianToCanvas({ ...normalized, innerHeight })
 
     // save drawn points and data points in arrays with same index to be used at hover to show tooltip
@@ -177,13 +189,24 @@ export const drawLines = ({
   drawnPoints,
   dataPoints,
   theme,
-  innerHeight
+  innerHeight,
+  innerWidth
 }: DrawLinesParams) => {
   ctx.lineWidth = 3
   ctx.globalAlpha = 1
   let nextLegendItemPosition = margin
   lines.forEach((line) => {
-    drawLine({ ctx, line, dataBoundaries, drawnPoints, dataPoints, margin, theme, innerHeight })
+    drawLine({
+      ctx,
+      line,
+      dataBoundaries,
+      drawnPoints,
+      dataPoints,
+      margin,
+      theme,
+      innerHeight,
+      innerWidth
+    })
 
     nextLegendItemPosition = drawLegendItem({
       ctx,
@@ -235,9 +258,11 @@ type DrawGridParams = {
   ctx: CanvasRenderingContext2D
   dataBoundaries: DataBoundaries
   theme: Theme
+  innerWidth: number
+  innerHeight: number
 }
 
-const drawXgrid = ({ ctx, dataBoundaries, theme }: DrawGridParams) => {
+const drawXgrid = ({ ctx, dataBoundaries, theme, innerWidth, innerHeight }: DrawGridParams) => {
   const xPointsDistance = Math.round(innerWidth / GRID_LINES)
   for (let i = 1; i <= GRID_LINES; i++) {
     const x = i * xPointsDistance
@@ -264,7 +289,7 @@ const drawXgrid = ({ ctx, dataBoundaries, theme }: DrawGridParams) => {
   }
 }
 
-const drawYgrid = ({ ctx, dataBoundaries, theme }: DrawGridParams) => {
+const drawYgrid = ({ ctx, dataBoundaries, theme, innerWidth, innerHeight }: DrawGridParams) => {
   const yPointsDistance = Math.round(innerHeight / GRID_LINES)
   for (let i = 0; i <= GRID_LINES; i++) {
     const y = i * yPointsDistance
@@ -284,22 +309,27 @@ const drawYgrid = ({ ctx, dataBoundaries, theme }: DrawGridParams) => {
     ctx.fillStyle = getCanvasBaseColor(theme)
     ctx.globalAlpha = 1
     ctx.textAlign = 'right'
-    i === 0 ? (ctx.textBaseline = 'top') : (ctx.textBaseline = 'middle')
+    ctx.textBaseline = i === 0 ? 'top' : 'middle'
     ctx.fillText(label, -2, innerHeight - y)
     ctx.restore()
   }
 }
 
-export const drawBackgroundGrid = ({ ctx, dataBoundaries, theme }: DrawGridParams) => {
+export const drawBackgroundGrid = ({
+  ctx,
+  dataBoundaries,
+  theme,
+  innerWidth,
+  innerHeight
+}: DrawGridParams) => {
   ctx.strokeStyle = 'grey'
   ctx.lineWidth = 1
   ctx.globalAlpha = 0.5
-  drawXgrid({ ctx, dataBoundaries, theme })
-  drawYgrid({ ctx, dataBoundaries, theme })
+  drawXgrid({ ctx, dataBoundaries, theme, innerWidth, innerHeight })
+  drawYgrid({ ctx, dataBoundaries, theme, innerWidth, innerHeight })
 }
 
 /**
- * /**
  * Spacing between grid lines: `max` split into `GRID_LINES` equal parts.
  * @param max top of the axis range
  * @returns the step distance between grid lines
@@ -328,12 +358,19 @@ export const scaleChart = ({ ctx, chartRef, width, height }: ScaleChartParams) =
   ctx.scale(dpr, dpr)
 }
 
+/**
+ * Draws the chart inner border leaving space on the sides for labels and legend
+ */
 export const drawInnerBorder = ({
   ctx,
-  margin
+  margin,
+  innerWidth,
+  innerHeight
 }: {
   ctx: CanvasRenderingContext2D
   margin: number
+  innerWidth: number
+  innerHeight: number
 }) => {
   ctx.translate(margin, margin)
   ctx.strokeRect(0, 0, innerWidth, innerHeight)
