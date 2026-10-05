@@ -28,7 +28,10 @@ export const getDataBoundaries = (lines: ChartData): DataBoundaries => {
   }
 }
 
-export const normalizePoint = ({
+/**
+ * Maps the data point coordinates to the space available in the canvas
+ */
+export const scaleDataPointToPixel = ({
   x,
   y,
   dataBoundaries,
@@ -40,7 +43,7 @@ export const normalizePoint = ({
   dataBoundaries: DataBoundaries
   innerWidth: number
   innerHeight: number
-}) => {
+}): ChartPoint => {
   const { maxX, maxY } = dataBoundaries
 
   const xScale = innerWidth / maxX
@@ -52,6 +55,9 @@ export const normalizePoint = ({
   }
 }
 
+/**
+ * The cartesian axes origin is bottom left, whilst the canvas origin is top left. Flips `y` around `innerHeight` and returns the point, with `x` unchanged 
+ */
 export const cartesianToCanvas = ({
   x,
   y,
@@ -60,7 +66,7 @@ export const cartesianToCanvas = ({
   x: number
   y: number
   innerHeight: number
-}) => {
+}): ChartPoint => {
   return {
     x: x,
     y: innerHeight - y
@@ -79,6 +85,10 @@ type DrawLineParams = {
   innerWidth: number
 }
 
+/**
+ * Draws a line by iterating all of its points, using the line color.
+ * Pushes each point in `drawnPoints` and `dataPoints` arrays (same index in both) for the hover tooltip.
+ */
 export const drawLine = ({
   ctx,
   line,
@@ -96,7 +106,7 @@ export const drawLine = ({
   ctx.beginPath()
 
   line.points.forEach((line, i) => {
-    const normalized = normalizePoint({
+    const normalized = scaleDataPointToPixel({
       x: line.x,
       y: line.y,
       dataBoundaries,
@@ -123,6 +133,9 @@ type FindPointAndShowTooltipParams = {
   setTooltip: Dispatch<SetStateAction<TooltipProps>>
 }
 
+/**
+ * Looks for the hovered point, and if found within 5px of the pointer, builds and sets the tooltip props. Otherwise sets `{show: false}`.
+ */
 export const findPointAndShowTooltip = ({
   e,
   drawnPoints,
@@ -137,7 +150,7 @@ export const findPointAndShowTooltip = ({
   )
   if (foundPointIndex >= 0) {
     const { x, y } = dataPoints[foundPointIndex]
-    setTooltip({ show: true, left: e.clientX, top: e.clientY, x, y })
+    setTooltip({ show: true, left: e.pageX, top: e.pageY, x, y })
   } else {
     setTooltip({
       show: false,

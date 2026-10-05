@@ -80,6 +80,9 @@ export const ChartPage = () => {
     })
     ctx.restore()
 
+    /**
+     * Finds the hovered point, if any, and trigger tooltip to render
+     */
     const handlePointerMove = (e: PointerEvent) => {
       findPointAndShowTooltip({ e, drawnPoints, dataPoints, setTooltip })
     }
