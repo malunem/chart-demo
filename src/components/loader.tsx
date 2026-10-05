@@ -1,3 +1,6 @@
+/**
+ * Renders a static 'Loading...' state
+ */
 export const Loader = () => {
   return (
     <div

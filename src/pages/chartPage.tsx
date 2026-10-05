@@ -34,7 +34,6 @@ export const ChartPage = () => {
   const [height, setHeight] = useState(500)
   const [width, setWidth] = useState(800)
 
-
   const dataBoundaries = useMemo(() => getDataBoundaries(lines), [lines])
 
   useEffect(() => {
@@ -90,7 +89,7 @@ export const ChartPage = () => {
       canvas.removeEventListener('pointermove', handlePointerMove)
       ctx.clearRect(0, 0, width, height)
     }
-  }, [lines, theme, width, height])
+  }, [lines, theme, width, height, dataBoundaries])
 
   return (
     <>
